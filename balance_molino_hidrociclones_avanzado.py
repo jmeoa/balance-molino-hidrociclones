@@ -9,6 +9,8 @@ import math
 
 st.set_page_config(page_title="Balance Molino-Hidrociclones", layout="wide")
 
+# Mostrar el logo de Hydrox
+st.image("hydrox_logo.png", width=300)
 st.title("Balance de Masas: Molino - Hidrociclones")
 
 st.sidebar.header("Parámetros del sistema")
