@@ -3,7 +3,11 @@
 
 import streamlit as st
 import plotly.graph_objects as go
+import pandas as pd
+import numpy as np
 import math
+
+st.set_page_config(page_title="Balance Molino-Hidrociclones", layout="wide")
 
 st.title("Balance de Masas: Molino - Hidrociclones")
 
@@ -47,29 +51,55 @@ st.subheader("Resultados del balance")
 st.markdown(f"- **Carga total al molino**: {P:.1f} t/h")
 st.markdown(f"- **Overflow (producto final)**: {O:.1f} t/h")
 st.markdown(f"- **Carga circulante**: {U / O:.2f}")
-st.markdown(f"- **% de sólidos en:**")
-st.markdown(f"   - Carga al molino: {porc_solidos_molino:.1f} %")
-st.markdown(f"   - Underflow: {porc_solidos_uf:.1f} %")
-st.markdown(f"   - Overflow: {porc_solidos_of:.1f} %")
 
-st.subheader("Simulación eficiencia de corte del ciclón")
-st.markdown(f"- d50: {d50:.1f} µm")
-st.markdown(f"- Partícula simulada: {d:.1f} µm")
-st.markdown(f"- **Eficiencia para d={d:.1f} µm**: {E_d:.1f} %")
+tabla_balance = pd.DataFrame({
+    "Flujo / Corriente": ["Alimentación al Molino", "Underflow", "Overflow"],
+    "Masa seca (t/h)": [P, U, O],
+    "Agua (m³/h)": [agua_adicional, agua_underflow, agua_overflow],
+    "% Sólidos": [porc_solidos_molino, porc_solidos_uf, porc_solidos_of],
+    "Total (t/h aprox)": [
+        P + agua_adicional * densidad_agua,
+        U + agua_underflow * densidad_agua,
+        O + agua_overflow * densidad_agua,
+    ]
+})
 
-st.subheader("Diagrama de flujo interactivo")
+st.subheader("Tabla consolidada por flujo")
+st.dataframe(tabla_balance.style.format({
+    "Masa seca (t/h)": "{:.1f}",
+    "Agua (m³/h)": "{:.1f}",
+    "% Sólidos": "{:.1f}",
+    "Total (t/h aprox)": "{:.1f}"
+}))
 
-fig = go.Figure()
+st.subheader("Curva de Eficiencia del Hidrociclón")
 
-fig.add_trace(go.Scatter(x=[1], y=[2], mode="markers+text", text=["Molino"], marker=dict(size=40), textposition="top center"))
-fig.add_trace(go.Scatter(x=[3], y=[2], mode="markers+text", text=["Hidrociclón"], marker=dict(size=40), textposition="top center"))
+d_values = np.linspace(10, 300, 100)
+efficiency = 1 / (1 + np.exp(s * (d50 - d_values) / d50)) * 100
 
-fig.add_annotation(x=1, y=2.5, text=f"F={F:.1f}", showarrow=True, arrowhead=1, ax=-50, ay=0)
-fig.add_annotation(x=2, y=2, text=f"P={P:.1f}", showarrow=True, arrowhead=1)
-fig.add_annotation(x=3, y=2.5, text=f"O={O:.1f}", showarrow=True, arrowhead=1, ax=50, ay=0)
-fig.add_annotation(x=3, y=1.5, text=f"U={U:.1f}", showarrow=True, arrowhead=1, ax=50, ay=-30)
+fig_ciclon = go.Figure()
+fig_ciclon.add_trace(go.Scatter(x=d_values, y=efficiency, mode='lines', name='Eficiencia (%)'))
+fig_ciclon.add_trace(go.Scatter(x=[d], y=[E_d], mode='markers+text', name=f'd={d} µm',
+                                text=[f"{E_d:.1f}%"], textposition="top center"))
+fig_ciclon.update_layout(
+    xaxis_title="Tamaño de partícula (µm)",
+    yaxis_title="Eficiencia de corte (%)",
+    template="plotly_white"
+)
+st.plotly_chart(fig_ciclon, use_container_width=True)
 
-fig.update_layout(showlegend=False, xaxis=dict(visible=False), yaxis=dict(visible=False),
-                  title="Diagrama de Flujo: Molino - Hidrociclones")
+st.subheader("Consumo Energético del Molino (Modelo de Bond)")
 
-st.plotly_chart(fig)
+f80 = 1000
+wi = 12
+p80_range = np.linspace(50, 500, 100)
+energia = 10 * wi * (1 / np.sqrt(p80_range) - 1 / np.sqrt(f80))
+
+fig_molino = go.Figure()
+fig_molino.add_trace(go.Scatter(x=p80_range, y=energia, mode='lines', name='Energía (kWh/t)'))
+fig_molino.update_layout(
+    xaxis_title="P80 (µm)",
+    yaxis_title="Consumo específico (kWh/t)",
+    template="plotly_white"
+)
+st.plotly_chart(fig_molino, use_container_width=True)

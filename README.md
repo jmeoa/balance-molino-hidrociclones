@@ -10,6 +10,7 @@ Aplicación interactiva desarrollada con **Streamlit** para simular el balance d
 - Cálculo de % de sólidos en cada corriente
 - Simulación de eficiencia del ciclón en función del d50
 - Diagrama de flujo interactivo con Plotly
+- Gráficos dinámicos: eficiencia del ciclón y consumo energético del molino (modelo de Bond)
 
 ## Requisitos
 
