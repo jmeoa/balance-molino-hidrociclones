@@ -10,7 +10,7 @@ import math
 
 st.set_page_config(page_title="Balance Molino-Hidrociclones", layout="wide")
 
-st.image("logo.png", width=300)
+st.sidebar.image("logo.png", width=200)
 st.title("Balance de Masas: Molino - Hidrociclones")
 
 st.sidebar.header("Parámetros del sistema")
@@ -49,10 +49,16 @@ porc_solidos_of = calc_porc_solidos(O, agua_overflow)
 
 E_d = 1 / (1 + math.exp(s * (d50 - d) / d50)) * 100
 
-st.subheader("Resultados del balance")
-st.markdown(f"- **Carga total al molino**: {P:.1f} t/h")
-st.markdown(f"- **Overflow (producto final)**: {O:.1f} t/h")
-st.markdown(f"- **Carga circulante**: {U / O:.2f}")
+st.image("diagrama_sistema.jpeg", caption="Diagrama del sistema de Molienda + Hidrociclón", use_column_width=True)
+
+# Etiquetas dinámicas por corriente
+st.markdown("### 🔄 Parámetros dinámicos por corriente:")
+st.markdown(f"**→ Carga Fresca:** {F:.1f} t/h (100% sólidos)")
+st.markdown(f"**→ Alimento al Molino:** {P:.1f} t/h | % sólidos: {porc_solidos_molino:.1f}% | Agua: {agua_adicional:.1f} m³/h")
+st.markdown(f"**→ Underflow del ciclón:** {U:.1f} t/h | % sólidos: {porc_solidos_uf:.1f}% | Agua: {agua_underflow:.1f} m³/h")
+st.markdown(f"**→ Overflow del ciclón (Producto):** {O:.1f} t/h | % sólidos: {porc_solidos_of:.1f}% | Agua: {agua_overflow:.1f} m³/h")
+
+st.subheader("Tabla consolidada por flujo")
 
 tabla_balance = pd.DataFrame({
     "Flujo / Corriente": ["Alimentación al Molino", "Underflow", "Overflow"],
@@ -66,7 +72,6 @@ tabla_balance = pd.DataFrame({
     ]
 })
 
-st.subheader("Tabla consolidada por flujo")
 st.dataframe(tabla_balance.style.format({
     "Masa seca (t/h)": "{:.1f}",
     "Agua (m³/h)": "{:.1f}",
@@ -74,14 +79,11 @@ st.dataframe(tabla_balance.style.format({
     "Total (t/h aprox)": "{:.1f}"
 }))
 
-# Subplots para los dos gráficos: eficiencia y consumo energético
 st.subheader("Gráficos dinámicos del sistema")
 
-# Datos para eficiencia del ciclón
 d_values = np.linspace(10, 300, 100)
 efficiency = 1 / (1 + np.exp(s * (d50 - d_values) / d50)) * 100
 
-# Datos para energía del molino
 f80 = 1000
 wi = 12
 p80_range = np.linspace(50, 500, 100)
