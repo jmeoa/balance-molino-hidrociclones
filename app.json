@@ -1,9 +1,0 @@
-
-{
-  "title": "Balance Molino-Hidrociclones",
-  "description": "Simulador interactivo para balance de masas y eficiencia en sistemas Molino + Hidrociclón. Desarrollado por Hydrox Smart Metallurgy.",
-  "thumbnail": "logo.png",
-  "config": {
-    "layout": "wide"
-  }
-}
