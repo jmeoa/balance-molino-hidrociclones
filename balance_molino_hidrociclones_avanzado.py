@@ -5,8 +5,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
+from PIL import Image
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 st.set_page_config(page_title="Balance Molino-Hidrociclones", layout="wide")
 
@@ -44,14 +44,17 @@ porc_solidos_molino = calc_porc_solidos(P, agua_adicional)
 porc_solidos_uf = calc_porc_solidos(U, agua_underflow)
 porc_solidos_of = calc_porc_solidos(O, agua_overflow)
 
-# Diagrama interactivo
 st.subheader("🔁 Diagrama interactivo con parámetros del flujo")
+
+# Cargar imagen .png como objeto PIL
+background_img = Image.open("diagrama_sistema.png")
 
 fig = go.Figure()
 
+# Usar imagen como fondo
 fig.add_layout_image(
     dict(
-        source="diagrama_sistema.jpeg",
+        source=background_img,
         xref="paper", yref="paper",
         x=0, y=1,
         sizex=1, sizey=1,
@@ -61,18 +64,18 @@ fig.add_layout_image(
     )
 )
 
-# Anotaciones con coordenadas aproximadas (pueden ajustarse luego)
-fig.add_annotation(x=0.06, y=0.5, text=f"{F:.1f} t/h", showarrow=False, font=dict(size=12, color="black"))
-fig.add_annotation(x=0.24, y=0.45, text=f"{P:.1f} t/h<br>{porc_solidos_molino:.1f}% sólidos<br>{agua_adicional:.1f} m³/h", showarrow=False)
-fig.add_annotation(x=0.65, y=0.28, text=f"{U:.1f} t/h<br>{porc_solidos_uf:.1f}%<br>{agua_underflow:.1f} m³/h", showarrow=False)
-fig.add_annotation(x=0.85, y=0.72, text=f"{O:.1f} t/h<br>{porc_solidos_of:.1f}%<br>{agua_overflow:.1f} m³/h", showarrow=False)
+# Anotaciones de valores dinámicos (posición estimada)
+fig.add_annotation(x=0.06, y=0.5, text=f"{F:.1f} t/h", showarrow=False, font=dict(size=14, color="white"))
+fig.add_annotation(x=0.24, y=0.45, text=f"{P:.1f} t/h<br>{porc_solidos_molino:.1f}% sólidos<br>{agua_adicional:.1f} m³/h", showarrow=False, font=dict(color="white"))
+fig.add_annotation(x=0.65, y=0.28, text=f"{U:.1f} t/h<br>{porc_solidos_uf:.1f}%<br>{agua_underflow:.1f} m³/h", showarrow=False, font=dict(color="white"))
+fig.add_annotation(x=0.85, y=0.72, text=f"{O:.1f} t/h<br>{porc_solidos_of:.1f}%<br>{agua_overflow:.1f} m³/h", showarrow=False, font=dict(color="white"))
 
 fig.update_xaxes(visible=False)
 fig.update_yaxes(visible=False)
 fig.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
     height=600,
-    template="plotly_white"
+    template="plotly_dark"
 )
 
 st.plotly_chart(fig, use_container_width=True)
